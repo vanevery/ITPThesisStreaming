@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
+		<link type="text/css" rel="stylesheet" href="assets/css/global.css" />
+
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+		<script type="text/javascript" src="myplayer/swfobject.js"></script>
+
+<!-- THIS REQUIRES https://github.com/vanevery/Simple-Streaming-Video-Player-Flash.git -->
+
+
+        <script type="text/javascript">
+        	function embedPlayer(divId, width, height, callbackFunction) {
+				// For version detection, set to min. required Flash Player version, or 0 (or 0.0.0), for no version detection. 
+				var swfVersionStr = "10.0.0";
+				// To use express install, set to playerProductInstall.swf, otherwise the empty string. 
+				var xiSwfUrlStr = "myplayer/playerProductInstall.swf";
+				var flashvars = {};
+				var params = {};
+				params.quality = "high";
+				params.bgcolor = "#000000";
+				params.allowscriptaccess = "sameDomain";
+				params.allowfullscreen = "true";
+				var attributes = {};
+				attributes.id = divId;
+				attributes.name = divId;
+				attributes.align = "middle";
+				swfobject.embedSWF(
+					"myplayer/SimpleStreamingVideoPlayer.swf", divId, 
+					width, height, swfVersionStr, xiSwfUrlStr, 
+					flashvars, params, attributes, callbackFunction);
+			}
+			
+			function playerInit(playerObjectId) {
+				//alert(playerObjectId);
+				if (playerObjectId == mainPlayer.player_id) {
+					mainPlayer.player_object.startStream(streamingServerAndApp, streams[0].main);
+				} else {
+					//alert("else");
+					for (var t = 0; t < thumbPlayers.length; t++) {
+						//alert("does " + playerObjectId + " == " + thumbPlayers[t].player_id);
+						if (playerObjectId == thumbPlayers[t].player_id) {
+							thumbPlayers[t].player_object.startStream(streamingServerAndApp, streams[t].thumb);
+							break;
+						}
+					}
+				}
+			}
+			
+			function playerClicked(playerObjectId) {
+				console.log("playerClicked " + playerObjectId);
+				for (var t = 0; t < thumbPlayers.length; t++) {
+					if (playerObjectId == thumbPlayers[t].player_id) {
+						mainPlayer.player_object.startStream(streamingServerAndApp, streams[t].main);
+						break;
+					}
+				}
+			}
+			
+			function netconnectionStatus(playerObjectId, statusCode) {
+				console.log("netconnectionStatus " + playerObjectId + " " + mainPlayer.player_id + " " + statusCode);
+				if (statusCode == "NetConnection.Connect.Success") {
+					if (playerObjectId == mainPlayer.player_id) {
+						mainPlayer.player_object.connectToSharedObject("itpSharedObject");
+					}
+				}
+			}
+			
+			function syncEvent(playerObjectId, key, value, code) {
+				console.log("syncEvent " + playerObjectId + " " + key + " " + value + " " + code);
+				//alert("syncEvent " + playerObjectId + " " + key + " " + value + " " + code);
+
+				if (playerObjectId == mainPlayer.player_id) {
+					if (code == "change") {
+						if (key == "presenter_name") {
+							document.getElementById("presenter").innerHTML = value;
+						} else if (key == "event_name") {
+							document.getElementById("event").innerHTML = value;
+						} else {
+							//alert("not a key");
+						}
+					}
+					else 
+					{
+						//alert("Not change?");
+					}
+				} else {
+					//alert("Not mainPlayer");
+				}
+			}
+			
+			function dimensionsChanged(playerObjectId, width, height) {
+				//alert("dimensionsChanged: " + playerObjectId + " " + width + " " + height);			
+			}
+
+
+			function Stream(_main, _thumb) {
+				this.main = _main;
+				this.thumb = _thumb;
+			}
+			
+			var streams = new Array();
+			// Stream names, Thumbnail Stream Names from Streaming Server
+			streams[0] = new Stream("ptzcamera.stream","ptzthumb.stream");
+			streams[1] = new Stream("camera3.stream","thumb3.stream");
+			streams[2] = new Stream("camera4.stream","thumb4.stream");
+			streams[3] = new Stream("camera7.stream","thumb7.stream");
+			streams[4] = new Stream("camera6.stream","thumb6.stream");
+			//streams[4] = new Stream("presenter","presenterthumb");
+
+			var streamingServerAndApp = "rtmp://YOUR WOWZA/RED5/FMS SERVER/live/";
+
+			function Player(_id, _object) {
+				this.player_id = _id;
+				this.player_object = _object;
+			}			
+			
+			var mainPlayer = null;
+			var thumbPlayers = new Array();
+
+			$(document).ready(function() {
+				embedPlayer("mainPlayer",480,270, function(e) {
+					if (e.success) {
+						mainPlayer = new Player(e.id, e.ref);	
+					}
+				});
+
+				for (var i = 0; i < 5; i++) {
+					embedPlayer("thumbPlayer"+(i+1),160,90, function(e) {
+						if (e.success) {
+							thumbPlayers.push(new Player(e.id, e.ref));
+						}
+					});
+				}
+								
+			});
+			
+		</script>
+	</head>
+	<body data-spy="scroll" data-target=".subnav" data-offset="50" data-twttr-rendered="true">
+		<div class="navbar navbar-fixed-top">
+			<div class="navbar-inner">
+				<div class="container">
+					<a class="brand">
+						<span class="cl-blue" id="presenter">Presenter</span>
+					</a>
+					<div class="nav-collapse">
+						<ul class="nav pull-right">
+							<li><a href="#" id="event">Event</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="main">
+			<div class="container">
+				<div class="row">
+					<div class="box-wrapper span12">
+						<div class="widget">
+							<div class="wrapper-search" style="padding-left:5px;">
+								<div class="span8 demo-video">
+										<div id="mainPlayer"></div>
+										<div style="width: 850px; padding-top: 10px; padding-bottom: 25px;">
+											<div id="thumbPlayer1"></div>
+											<div id="thumbPlayer2"></div>
+											<div id="thumbPlayer3"></div>
+											<div id="thumbPlayer4"></div>
+											<div id="thumbPlayer5"></div>
+										</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
+
+

@@ -7,8 +7,6 @@
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
 		<script type="text/javascript" src="myplayer/swfobject.js"></script>
 
-<!-- THIS REQUIRES https://github.com/vanevery/Simple-Streaming-Video-Player-Flash.git -->
-
 
         <script type="text/javascript">
         	function embedPlayer(divId, width, height, callbackFunction) {
@@ -77,8 +75,19 @@
 							document.getElementById("presenter").innerHTML = value;
 						} else if (key == "event_name") {
 							document.getElementById("event").innerHTML = value;
+						} else if (key == "new_record") {
+							if (value == true) {
+								alert("New Video Recording Now!" + key + " " + value + " " + code);
+								// This signals a new recording
+								// This should trigger a new popcorn start time/reset
+								// Unique id
+							}
+							else {
+								alert("Finished Recording OR page loading");
+							}
+							
 						} else {
-							//alert("not a key");
+							//alert("key == " + key);
 						}
 					}
 					else 
@@ -101,15 +110,19 @@
 			}
 			
 			var streams = new Array();
-			// Stream names, Thumbnail Stream Names from Streaming Server
-			streams[0] = new Stream("ptzcamera.stream","ptzthumb.stream");
+			//streams[0] = new Stream("ptzcamera.stream","ptzthumb.stream");
+			streams[0] = new Stream("camera3.stream","thumb3.stream");
 			streams[1] = new Stream("camera3.stream","thumb3.stream");
-			streams[2] = new Stream("camera4.stream","thumb4.stream");
-			streams[3] = new Stream("camera7.stream","thumb7.stream");
-			streams[4] = new Stream("camera6.stream","thumb6.stream");
+			streams[2] = new Stream("camera3.stream","thumb3.stream");
+			streams[3] = new Stream("camera3.stream","thumb3.stream");
+			streams[4] = new Stream("camera3.stream","thumb3.stream");
+
+			//streams[2] = new Stream("camera4.stream","thumb4.stream");
+			//streams[3] = new Stream("camera7.stream","thumb7.stream");
+			//streams[4] = new Stream("camera6.stream","thumb6.stream");
 			//streams[4] = new Stream("presenter","presenterthumb");
 
-			var streamingServerAndApp = "rtmp://YOUR WOWZA/RED5/FMS SERVER/live/";
+			var streamingServerAndApp = "rtmp://128.122.151.16/live/";
 
 			function Player(_id, _object) {
 				this.player_id = _id;
@@ -171,6 +184,8 @@
 								</div>
 							</div>
 						</div>
+						<div style="vertical-align: top; text-align: left;">
+							<a href="http://shep.info/channels/itp" target="_NEW">Join Chat Room shep.info/channels/itp</a><br />
 					</div>
 				</div>
 			</div>
